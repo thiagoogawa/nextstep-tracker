@@ -11,7 +11,7 @@ import SwiftUI
 struct NextStep_TrackerApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DashboardView()
         }
     }
 }
