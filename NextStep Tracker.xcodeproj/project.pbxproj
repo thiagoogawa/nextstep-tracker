@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		DEA275CF2E47AB24006849AB /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = DEA275CE2E47AB24006849AB /* Algorithms */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		DE300D2E2E39FC8F0051F83A /* NextStep Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NextStep Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DEA275CF2E47AB24006849AB /* Algorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = "NextStep Tracker";
 			packageProductDependencies = (
+				DEA275CE2E47AB24006849AB /* Algorithms */,
 			);
 			productName = "NextStep Tracker";
 			productReference = DE300D2E2E39FC8F0051F83A /* NextStep Tracker.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = DE300D252E39FC8F0051F83A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DEA275CD2E47AB24006849AB /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DE300D2F2E39FC8F0051F83A /* Products */;
 			projectDirPath = "";
@@ -330,6 +339,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DEA275CD2E47AB24006849AB /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DEA275CE2E47AB24006849AB /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DEA275CD2E47AB24006849AB /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DE300D262E39FC8F0051F83A /* Project object */;
 }
