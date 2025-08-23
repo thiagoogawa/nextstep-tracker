@@ -23,7 +23,7 @@ enum HealthMetricContext: CaseIterable, Identifiable {
 }
 
 struct DashboardView: View {
-
+ 
     @Environment(HealthKitManager.self) private var hkManager
     @AppStorage("hasSeenPermissionPriming") private var hasSeenPermissionPriming = false
     @State private var isShowingPermissionPrimingSheet = false
