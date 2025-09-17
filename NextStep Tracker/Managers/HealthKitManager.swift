@@ -4,16 +4,41 @@
 //
 //  Created by Thiago Ogawa on 31/07/25.
 //
-
 import Foundation
 import HealthKit
 import Observation
 
-enum STError: Error {
+enum STError: LocalizedError {
     case authNotDetermined
     case sharingDenied(quantityType: String)
     case noData
     case unableToCompleteRequest
+    
+    var errorDescription: String? {
+        switch self {
+        case .authNotDetermined:
+            "Need Access to Health Data"
+        case .sharingDenied(_):
+            "No Write Access"
+        case .noData:
+            "No Data"
+        case .unableToCompleteRequest:
+            "Unable to Complete Request"
+        }
+    }
+    
+    var failureReason: String {
+        switch self {
+        case .authNotDetermined:
+            "You have not given access to your Health data. Please go to Settings > Health > Data Access & Devices."
+        case .sharingDenied(let quantityType):
+            "You have denied access to upload your \(quantityType) data.\n\nYou can change this in Settings > Health > Data Access & Devices."
+        case .noData:
+            "There is no data for this Health statistic."
+        case .unableToCompleteRequest:
+            "We are unable to complete your request at this time.\n\nPlease try again later or contact support."
+        }
+    }
 }
 
 @Observable class HealthKitManager {
@@ -26,7 +51,7 @@ enum STError: Error {
     var weightData: [HealthMetric] = []
     var weightDiffData: [HealthMetric] = []
     
-    func fetchStepCount() async throws{
+    func fetchStepCount() async throws {
         guard store.authorizationStatus(for: HKQuantityType(.stepCount)) != .notDetermined else {
             throw STError.authNotDetermined
         }
@@ -42,7 +67,6 @@ enum STError: Error {
                                                                options: .cumulativeSum,
                                                                anchorDate: endDate,
                                                                intervalComponents: .init(day: 1))
-        
         do {
             let stepCounts = try await stepsQuery.result(for: store)
             stepData = stepCounts.statistics().map {
@@ -54,23 +78,22 @@ enum STError: Error {
             throw STError.unableToCompleteRequest
         }
     }
-        
+    
     func fetchWeights() async throws {
         guard store.authorizationStatus(for: HKQuantityType(.bodyMass)) != .notDetermined else {
             throw STError.authNotDetermined
         }
-        
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
         let endDate = calendar.date(byAdding: .day, value: 1, to: today)!
         let startDate = calendar.date(byAdding: .day, value: -28, to: endDate)
-            
+        
         let queryPredicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate)
         let samplePredicate = HKSamplePredicate.quantitySample(type: HKQuantityType(.bodyMass), predicate: queryPredicate)
         let weightQuery = HKStatisticsCollectionQueryDescriptor(predicate: samplePredicate,
-                                                                    options: .mostRecent,
-                                                                    anchorDate: endDate,
-                                                                    intervalComponents: .init(day: 1))
+                                                                options: .mostRecent,
+                                                                anchorDate: endDate,
+                                                                intervalComponents: .init(day: 1))
         
         do {
             let weights = try await weightQuery.result(for: store)
@@ -84,7 +107,7 @@ enum STError: Error {
         }
     }
     
-    func fetchWeightsForDifferentials() async throws{
+    func fetchWeightForDifferentials() async throws {
         guard store.authorizationStatus(for: HKQuantityType(.bodyMass)) != .notDetermined else {
             throw STError.authNotDetermined
         }
@@ -113,34 +136,30 @@ enum STError: Error {
         }
     }
     
-    func addStepData(for date: Date, value: Double) async throws{
+    func addStepData(for date: Date, value: Double) async throws {
         let status = store.authorizationStatus(for: HKQuantityType(.stepCount))
         switch status {
-            case .notDetermined:
-                throw STError.authNotDetermined
-            case .sharingDenied:
-                throw STError.sharingDenied(quantityType: "step count")
-            case .sharingAuthorized:
-                break
-            @unknown default:
-                break
+        case .notDetermined:
+            throw STError.authNotDetermined
+        case .sharingDenied:
+            throw STError.sharingDenied(quantityType: "step count")
+        case .sharingAuthorized:
+            break
+        @unknown default:
+            break
         }
         
         let stepQuantity = HKQuantity(unit: .count(), doubleValue: value)
-        let stepSample = HKQuantitySample(type: HKQuantityType(.stepCount),
-                                            quantity: stepQuantity,
-                                            start: date,
-                                            end: date)
+        let stepSample = HKQuantitySample(type: HKQuantityType(.stepCount), quantity: stepQuantity, start: date, end: date)
         
         do {
             try await store.save(stepSample)
         } catch {
             throw STError.unableToCompleteRequest
         }
-
     }
     
-    func addWeightData(for date: Date, value: Double) async throws{
+    func addWeightData(for date: Date, value: Double) async throws {
         
         let status = store.authorizationStatus(for: HKQuantityType(.bodyMass))
         switch status {
@@ -155,43 +174,33 @@ enum STError: Error {
         }
         
         let weightQuantity = HKQuantity(unit: .pound(), doubleValue: value)
-        let weightSample = HKQuantitySample(type: HKQuantityType(.bodyMass),
-                                          quantity: weightQuantity,
-                                          start: date,
-                                          end: date)
+        let weightSample = HKQuantitySample(type: HKQuantityType(.bodyMass), quantity: weightQuantity, start: date, end: date)
+        
         do {
             try await store.save(weightSample)
         } catch {
             throw STError.unableToCompleteRequest
         }
     }
-        
-//    func addSimulatorData() async {
-//        var mockSamples: [HKQuantitySample] = []
-//        
-//        for i in 0..<28 {
-//            let stepQuantity = HKQuantity(unit: .count(), doubleValue: .random(in: 4_000...20_000))
-//            let weightQuantity = HKQuantity(unit: .pound(), doubleValue: .random(in: (160 + Double(i/3)...(165 + Double(i/3) ))))
-//            
-//            let startDate = Calendar.current.date(byAdding: .day, value: -i, to: .now)!
-//            let endDate = Calendar.current.date(byAdding: .second, value: 1, to: startDate)!
-//            
-//            
-//            let stepSample = HKQuantitySample(type: HKQuantityType(.stepCount),
-//                                              quantity: stepQuantity,
-//                                              start: startDate,
-//                                              end: endDate)
-//            
-//            let weightSample = HKQuantitySample(type: HKQuantityType(.bodyMass),
-//                                                quantity: weightQuantity,
-//                                                start: startDate,
-//                                                end: endDate)
-//            
-//            mockSamples.append(stepSample)
-//            mockSamples.append(weightSample)
-//        }
-//        
-//        try! await store.save(mockSamples)
-//        print("Dummy data set up")
-//    }
+    
+    //    func addSimulatorData() async {
+    //        var mockSamples: [HKQuantitySample] = []
+    //
+    //        for i in 0..<28 {
+    //            let stepQuantity = HKQuantity(unit: .count(), doubleValue: .random(in: 4_000...20_000))
+    //            let weightQuanity = HKQuantity(unit: .pound(), doubleValue: .random(in: (160 + Double(i/3)...165 + Double(i/3))))
+    //
+    //            let startDate = Calendar.current.date(byAdding: .day, value: -i, to: .now)!
+    //            let endDate = Calendar.current.date(byAdding: .second, value: 1, to: startDate)!
+    //
+    //            let stepSample = HKQuantitySample(type: HKQuantityType(.stepCount), quantity: stepQuantity, start: startDate, end: endDate)
+    //            let weightSample = HKQuantitySample(type: HKQuantityType(.bodyMass), quantity: weightQuanity, start: startDate, end: endDate)
+    //
+    //            mockSamples.append(stepSample)
+    //            mockSamples.append(weightSample)
+    //        }
+    //
+    //        try! await store.save(mockSamples)
+    //        print("✅ Dummy Data sent up")
+    //    }
 }
