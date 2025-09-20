@@ -3,6 +3,9 @@ NextStep Tracker integrates Apple Health to show your latest step and weight dat
 
 NextStep Tracker also allows you to upload new step or weight data to the Apple Health app. This project was developed during Sean Allen's course.
 
+# Animated Swift Charts
+https://github.com/user-attachments/assets/a9ad50fc-f62f-429d-a476-46a1b89a6d53
+
 # Technologies Used
 * SwiftUI
 * HealthKit
@@ -11,8 +14,6 @@ NextStep Tracker also allows you to upload new step or weight data to the Apple 
 * DocC
 * Git & GitHub
 
-# Animated Swift Charts
-https://github.com/user-attachments/assets/a9ad50fc-f62f-429d-a476-46a1b89a6d53
 
 
 
