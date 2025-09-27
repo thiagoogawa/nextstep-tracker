@@ -54,7 +54,7 @@ Here's the code:
 ```
 <br>
 </br>
-<img width="1920" height="846" alt="readme-weight-diff" src="https://github.com/user-attachments/assets/609d2d5c-11c6-48aa-afb6-e2b1cf99449f" />
+<img width="1298" height="700" alt="teste3" src="https://github.com/user-attachments/assets/01214043-df48-4c83-a255-09028e590767" />
 
 
 
